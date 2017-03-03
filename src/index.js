@@ -40,15 +40,70 @@
 
     DialogProto.trigger = function () {};
 
+    var _type = function (type) {
+        return function (obj) {
+            return Object.prototype.toString.call(obj) === '[object ' + type + ']';
+        }
+    };
+
+    var _isArray = (function () {
+        if (Array.isArray) {
+            return Array.isArray;
+        }
+        else {
+            return _type('Array');
+        }
+    })();
+
+    var _inArray = (function () {
+        if (Array.prototype.indexOf) {
+            return function (arr, s) {
+                return !!~Array.prototype.indexOf.call(arr, s);
+            }
+        }
+        else {
+            return function (arr, s) {
+                for (var i = 0, len = arr.length; i < len; i++) {
+                    if (arr[i] === s) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+    })();
+
+    var _dom = document.createElement('a');
+
+    var _hasClass = (function () {
+        if (_dom.classList) {
+            return function (elm, name) {
+                return elm.classList.contains(name);
+            }
+        }
+        return function (elm, name) {
+            return el.className.match(new RegExp('(\\s|^)(' + name + ')(\\s|$)'));
+        }
+    })();
 
 
     var util = {
-        inArray: function () {},
-        isArray: function () {},
-        isObject: function () {},
-        isFunction: function () {},
-        isString: function () {},
-        hasClass: function () {},
+        inArray: function (arr, s) {
+            if (!_isArray(arr) || s === undefined) {
+                return false;
+            }
+            return _inArray(arr, s);
+        },
+        isArray: _isArray,
+        isObject: _type('Object'),
+        isFunction: _type('Function'),
+        isString: _type('String'),
+        hasClass: function (elm, className) {
+            if (!elm || !className) {
+                return false;
+            }
+            return _hasClass(elm, className);
+        },
         trim: function () {},
         addClass: function () {},
         removeClass: function () {},
