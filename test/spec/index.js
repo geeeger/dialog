@@ -1,7 +1,7 @@
 import Dialog from 'dist/index';
 import { expect } from 'chai';
 
-describe('Test instance method', () => {
+describe('测试实例属性和方法', () => {
   let dialog;
 
   let methods = {
@@ -26,13 +26,13 @@ describe('Test instance method', () => {
   });
 
   for (let method in methods) {
-    it('Dialog should have method ' + method + ' in prototype', () => {
+    it('在原型链上应该存在方法：' + method, () => {
         expect(typeof dialog[method]).to.equal(methods[method])
     })
   }
 });
 
-describe('Test static method and property', () => {
+describe('测试静态属性和方法', () => {
 
     let methods = {
         'util': {
@@ -57,10 +57,30 @@ describe('Test static method and property', () => {
         'animate': 'function'
     };
 
+    function istype(obj) {
+        return Object.prototype
+            .toString
+            .call(obj)
+            .match(/\[object (.*)\]/)[1]
+            .toLowerCase();
+    }
+
+    function _each(obj, callback, namespace) {
+        for (let method in obj) {
+            if (istype(obj[method]) === 'object') {
+                namespace.push(method);
+                _each(obj[method], callback, namespace);
+            }
+            else {
+                callback(obj[method], method, namespace);
+            }
+        }
+    }
+
     function each(obj, callback) {
         for (let method in obj) {
-            if (typeof obj[method] === 'object') {
-                each(obj[method], callback);
+            if (istype(obj[method]) === 'object') {
+                _each(obj[method], callback, [method]);
             }
             else {
                 callback(obj[method], method);
@@ -68,26 +88,36 @@ describe('Test static method and property', () => {
         }
     }
 
-    each(methods, (type, methodName) => {
-        it('should have static method ' + methodName, () => {
-            expect(typeof Dialog[methodName]).to.equal(type)
+    function getProperty(obj, namespace) {
+        let namespacecopy = namespace.slice();
+        namespacecopy.splice(0, 1, obj[namespacecopy[0]]);
+        return namespacecopy.reduce(function (a, b) {
+            return a[b];
+        });
+    }
+
+    each(methods, (type, methodName, namespace) => {
+        let _namespace = namespace ? namespace.slice() : [];
+        _namespace.push(methodName);
+        it('应该存在属性或方法：' + _namespace.join('.'), () => {
+            expect(istype(getProperty(Dialog, _namespace))).to.equal(type)
         });
     })
 });
 
-describe('Test Contructor', () => {
+describe('测试构造器', () => {
     let dialog;
 
     beforeEach(() => {
         dialog = new Dialog();
     });
 
-    it('should return an instance if user call it without keyword "new"', () => {
+    it('如果用户不用new关键字调用该类，应该正确处理', () => {
         let dialogInstance = Dialog();
         expect(dialogInstance instanceof Dialog).to.equal(true)
     });
 
-    it('shold return an instance if user call it with keyword "new"', () => {
+    it('可以用new关键字实例化', () => {
         let dialogInstance = new Dialog();
         expect(dialogInstance instanceof Dialog).to.equal(true)
     });
