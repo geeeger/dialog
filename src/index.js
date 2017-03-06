@@ -4,7 +4,7 @@
 (function() {
     'use strict';
 
-    var _cache = [];
+    // var _cache = [];
 
     var _STATUS_OPEN = 'open';
 
@@ -29,6 +29,27 @@
 
     var DialogProto = Dialog.prototype;
 
+    var _css = function (el, styles) {
+        el.style.cssText = styles;
+    };
+
+    var _config = {
+        template: [
+            '<div class="qie-dialog-mask">',
+                '<div class="qie-dialog">',
+                    '<div class="qie-dialog-header">',
+                        '<div class="qie-dialog-title"></div>',
+                        '<input class="qie-dialog-close" type="button" value="\xd7" />',
+                    '</div>',
+                    '<div class="qie-dialog-content"></div>',
+                    '<div class="qie-dialog-footer">',
+                        '<div class="qie-dialog-buttons"></div>',
+                    '</div>',
+                '</div>',
+            '</div>'
+        ].join('')
+    };
+
     DialogProto.init = function (options) {
         _observable(this);
         this.options = options;
@@ -40,13 +61,64 @@
         else {
             this._status = _STATUS_CLOSE;
         }
-        _cache.push(this);
 
-        this._initPos();
-        this._initMask();
-        this._initTitle();
-        this._initContent();
-        this._initButton();
+        this._create();
+
+        this._getDom();
+
+        this._initHeader();
+
+        this._initFooter();
+
+        this._initClose();
+
+
+        // _cache.push(this);
+    };
+
+    var _transToCamels = function (str) {
+        var arr = str.split('-');
+
+        for (var i = 1, len = arr.length; i < len; i++) {
+            arr[i] = arr[i][0].toUpperCase() + arr[i].substring(1);
+        }
+        return arr.join('');
+    };
+
+    var _PREFIX_REG = /^qie-dialog-/;
+
+    DialogProto._getDom = function () {
+        var wrap = document.getElementById(this.id);
+        this.dom = {};
+        var elements = wrap.getElementsByTagName('*');
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+            var name = _transToCamels(elements[i].className.replace(_PREFIX_REG, ''));
+            this.dom[name] = elements[i];
+        }
+        this.dom.wrap = wrap;
+    };
+
+    // 目前来说没什么需要防止的
+    Dialog.set = function (key, value) {
+        _config[key] = value;
+        return Dialog;
+    };
+
+    Dialog.get = function (key) {
+        return _config[key];
+    };
+
+    DialogProto._create = function () {
+        var body = document.body;
+        var wrap = document.createElement('div');
+        _css(wrap, 'position:absolute;left:0;top:0;');
+        wrap.id = this._id;
+        if (this.options.theme) {
+            wrap.className = this.options.theme;
+        }
+        wrap.innerHTML = Dialog.get('template');
+        document.body.appendChild = wrap;
     };
 
     DialogProto._initPos = function () {};
@@ -67,7 +139,36 @@
 
     DialogProto.unlock = function () {};
 
-    DialogProto.title = function () {};
+    var _hide = function (obj) {
+        obj.style.display = 'none';
+    };
+
+    var _show = function (obj) {
+        obj.style.display = 'block';
+    };
+
+    DialogProto._initHeader = function () {
+        if (this.options.header === false) {
+            _hide(this.dom.header);
+        }
+    };
+
+    DialogProto._initFooter = function () {
+        if (this.options.footer === false) {
+            _hide(this.dom.footer);
+        }
+    };
+
+    DialogProto._initClose = function () {
+        if (this.options.closebtn === false) {
+            _hide(this.dom.close);
+        }
+    };
+
+    DialogProto.title = function (title) {
+        title = title || this.options.title || '';
+        this.dom.title.innerHTML = title;
+    };
 
     /**
      * 显示
