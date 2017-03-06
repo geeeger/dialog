@@ -24,8 +24,6 @@ describe('测试实例属性和方法', () => {
     'lock': 'function',
     'unlock': 'function',
     'title': 'function',
-    'show': 'function',
-    'hide': 'function',
     'content': 'function',
     'time': 'function',
     'animate': 'function',
@@ -62,8 +60,7 @@ describe('测试静态属性和方法', () => {
             'toArray': 'function',
             'extend': 'function'
         },
-        'VERSION': 'string',
-        'animate': 'function'
+        'VERSION': 'string'
     };
 
     function istype(obj) {
