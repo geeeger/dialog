@@ -1,21 +1,16 @@
 import Dialog from 'dist/index';
-import { expect, assert } from 'chai';
+import { expect } from 'chai';
 
 describe('测试构造器', () => {
-    let dialog;
-
-    beforeEach(() => {
-        dialog = new Dialog();
-    });
 
     it('如果用户不用new关键字调用该类，应该正确处理', () => {
         let dialogInstance = Dialog();
-        expect(dialogInstance instanceof Dialog).to.equal(true)
+        expect(dialogInstance instanceof Dialog).to.equal(true);
     });
 
     it('可以用new关键字实例化', () => {
         let dialogInstance = new Dialog();
-        expect(dialogInstance instanceof Dialog).to.equal(true)
+        expect(dialogInstance instanceof Dialog).to.equal(true);
     });
 });
 
@@ -33,7 +28,7 @@ describe('测试实例属性和方法', () => {
     'hide': 'function',
     'content': 'function',
     'time': 'function',
-    '_animate': 'function',
+    'animate': 'function',
     'on': 'function',
     'off': 'function',
     'trigger': 'function'
@@ -45,8 +40,8 @@ describe('测试实例属性和方法', () => {
 
   for (let method in methods) {
     it('在原型链上应该存在方法：' + method, () => {
-        expect(typeof dialog[method]).to.equal(methods[method])
-    })
+        expect(typeof dialog[method]).to.equal(methods[method]);
+    });
   }
 });
 
@@ -65,13 +60,9 @@ describe('测试静态属性和方法', () => {
             'removeClass': 'function',
             'isDom': 'function',
             'toArray': 'function',
-            'IU': 'function',
             'extend': 'function'
         },
         'VERSION': 'string',
-        'EASING': 'array',
-        'NODE_TYPE': 'object',
-        'plugins': 'object',
         'animate': 'function'
     };
 
@@ -118,7 +109,7 @@ describe('测试静态属性和方法', () => {
         let _namespace = namespace ? namespace.slice() : [];
         _namespace.push(methodName);
         it('应该存在属性或方法：' + _namespace.join('.'), () => {
-            expect(istype(getProperty(Dialog, _namespace))).to.equal(type)
+            expect(istype(getProperty(Dialog, _namespace))).to.equal(type);
         });
     });
 
@@ -135,7 +126,7 @@ describe('测试静态属性和方法', () => {
             expect(Dialog.util.inArray([1,2,3,4,5], 4)).to.be.true;
             expect(Dialog.util.inArray([1,2,3,4,-1], -1)).to.be.true;
             expect(Dialog.util.inArray([1,2,0,4,2], 2)).to.be.true;
-        })
+        });
     });
 
     describe('测试util.isArray', () => {
@@ -255,9 +246,9 @@ describe('测试静态属性和方法', () => {
 
         it('查找到class', () => {
             let body = document.body;
-            body.classList.add('a')
-            body.classList.add('a-1')
-            body.classList.add('a_1')
+            body.classList.add('a');
+            body.classList.add('a-1');
+            body.classList.add('a_1');
             expect(Dialog.util.hasClass(body, 'a')).to.be.true;
             expect(Dialog.util.hasClass(body, 'a-1')).to.be.true;
             expect(Dialog.util.hasClass(body, 'a_1')).to.be.true;
@@ -281,11 +272,11 @@ describe('测试静态属性和方法', () => {
             body.classList.add('test');
             body.classList.add('test-1');
             body.classList.add('test_1');
-            expect(Dialog.util.removeClass(body, 'test')).to.equal('test');
+            Dialog.util.removeClass(body, 'test');
             expect(body.className).to.equal('test-1 test_1');
-            expect(Dialog.util.removeClass(body, 'test-1')).to.equal('test-1');
+            Dialog.util.removeClass(body, 'test-1');
             expect(body.className).to.equal('test_1');
-            expect(Dialog.util.removeClass(body, 'test_1')).to.equal('test_1');
+            Dialog.util.removeClass(body, 'test_1');
             expect(body.className).to.equal('');
         });
 
@@ -295,13 +286,16 @@ describe('测试静态属性和方法', () => {
             body.classList.add('test');
             body.classList.add('test-1');
             body.classList.add('test_1');
-            expect(Dialog.util.removeClass(body, 'test2')).to.equal('');
+            Dialog.util.removeClass(body, 'test2');
             expect(body.className).to.equal('test test-1 test_1');
             body.className = '';
-            expect(Dialog.util.removeClass(body, 'test2')).to.equal('');
+            Dialog.util.removeClass(body, 'test2');
             expect(body.className).to.equal('');
         });
     });
 
 });
 
+
+
+// 写不下去了
