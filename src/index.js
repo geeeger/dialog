@@ -4,17 +4,60 @@
 (function() {
     'use strict';
 
+    var _cache = [];
+
+    var _STATUS_OPEN = 'open';
+
+    var _STATUS_CLOSE = 'close';
+
     function Dialog(options) {
         if ((this instanceof Dialog) === false) {
             return new Dialog(options);
         }
+
+        this.init(options);
     }
+
+    // 按钮设计
+    // botton: [{
+    //  id: 'xxx',
+    //  value: '',
+    //  callback: ''
+    // }]
+
+    // 自定义
 
     var DialogProto = Dialog.prototype;
 
-    DialogProto.init = function () {
+    DialogProto.init = function (options) {
         _observable(this);
+        this.options = options;
+        this._id = _random();
+
+        if (options.initlize) {
+            this._status = _STATUS_OPEN;
+        }
+        else {
+            this._status = _STATUS_CLOSE;
+        }
+        _cache.push(this);
+
+        this._initPos();
+        this._initMask();
+        this._initTitle();
+        this._initContent();
+        this._initButton();
     };
+
+    DialogProto._initPos = function () {};
+
+    DialogProto._initMask = function () {};
+
+    DialogProto._initTitle = function () {};
+
+    DialogProto._initContent = function () {};
+
+    DialogProto._initButton = function () {};
 
     DialogProto.open = function () {};
 
@@ -230,6 +273,10 @@
                 main[property] = extend[property];
             }
         }
+    };
+
+    var _random = function () {
+        return Math.random().toString(16).substring(2);
     };
 
     var _observable = function (ctx) {
