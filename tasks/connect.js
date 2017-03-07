@@ -15,7 +15,18 @@ module.exports = {
       keepalive: true,
       open: 'http://localhost:' + env.keepalivePortNumber + '/test/SpecRunner.html',
       middleware: function(connect, options, middlewares) {
-        console.log(env.livereloadPortNumber + '\n');
+        middlewares.unshift(livereload({ port: env.livereloadPortNumber }));
+        return middlewares;
+      }
+    }
+  },
+  demo: {
+    options: {
+      port: env.demoPortNumber,
+      host: 'localhost',
+      keepalive: true,
+      open: 'http://localhost:' + env.demoPortNumber + '/demo/index.html',
+      middleware: function(connect, options, middlewares) {
         middlewares.unshift(livereload({ port: env.livereloadPortNumber }));
         return middlewares;
       }

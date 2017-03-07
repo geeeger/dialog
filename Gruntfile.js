@@ -11,4 +11,5 @@ module.exports = function(grunt) {
   grunt.registerTask('lint', ['eslint:all']);
   grunt.registerTask('serve', ['build', 'concurrent:build']);
   grunt.registerTask('test', ['connect:test', 'mocha:test']);
+  grunt.registerTask('demo', ['connect:demo']);
 };

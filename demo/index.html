@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo</title>
+    <script type="text/javascript" src="../dist/index.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        // qieDialog({
+        //     visible: true,
+        //     title: 'testfdsafdsa',
+        //     // header: false,
+        //     buttons: [{
+        //         id: '324',
+        //         value: '关闭',
+        //         callback: function (evt) {
+        //             this.parent.close();
+        //         }
+        //     },
+        //     {
+        //         id: '3423',
+        //         value: '成功',
+        //         callback: function (evt) {
+        //             this.parent.hide();
+        //         }
+        //     }]
+        // })
+
+        qieDialog.util.extend(qieDialog, {
+            toast: function (content) {
+                return qieDialog({
+                    visible: true,
+                    header: false,
+                    footer: false,
+                    theme: 'qie-toast',
+                    time: 3,
+                    content: content
+                });
+            },
+            confirm: function (msg, callback) {
+                return qieDialog({
+                    visible: true,
+                    header: false,
+                    // lock: true,
+                    buttons: [
+                        {
+                            value: '确认',
+                            callback: callback,
+                            className: 'qie-dialog-btn-ok'
+                        },
+                        {
+                            value: '取消',
+                            callback: callback,
+                            className: 'qie-dialog-btn-cancel'
+                        }
+                    ],
+                    content: msg
+                })
+            }
+        });
+
+        qieDialog.toast('hahahaha');
+
+        qieDialog.confirm('测试确认框', function (evt) {
+            console.log(this.parent)
+            alert(this.value())
+        });
+
+        // console.log(qieDialog.util)
+
+    </script>
+</body>
+</html>

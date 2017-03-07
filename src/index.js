@@ -4,22 +4,10 @@
 (function() {
     'use strict';
 
-    // var _cache = [];
-
-    /*
-     * 这两个状态似乎没什么用了。。。
-     * 因为我并不会在多个弹窗弹出的时候管理他们。。。
-     */
     var _STATUS_OPEN = 'open';
 
     var _STATUS_CLOSE = 'close';
 
-    /**
-     * 将会把animate函数放在这里,当改变animate函数的时候
-     * 会传递到prototype上，
-     * 意义不咋
-     * @type {Object}
-     */
     var _config = {
         defaultTemplate: [
             '<div class="qie-dialog-mask">',
@@ -45,31 +33,14 @@
 
     var _PREFIX_DEFAULT_REG = /^qie/;
 
-    /**
-     * 通过cssText设置样式
-     * 注意，这样设置样式会清空之前设置的样式
-     * @param  {[type]} el     [description]
-     * @param  {[type]} styles [description]
-     * @return {[type]}        [description]
-     */
     var _css = function (el, styles) {
         el.style.cssText = styles;
     };
 
-    /**
-     * [_hide description]
-     * @param  {[type]} obj [description]
-     * @return {[type]}     [description]
-     */
     var _hide = function (obj) {
         obj.style.display = 'none';
     };
 
-    /**
-     * [_show description]
-     * @param  {[type]} obj [description]
-     * @return {[type]}     [description]
-     */
     var _show = function (obj) {
         obj.style.display = 'block';
     };
@@ -78,11 +49,6 @@
         obj.innerHTML = html;
     };
 
-    /**
-     * 转换成驼峰写法
-     * @param  {[type]} str [description]
-     * @return {[type]}     [description]
-     */
     var _transToCamels = function (str) {
         var arr = str.split('-');
 
@@ -106,9 +72,6 @@
         };
     };
 
-    /**
-     * 兼容写法最终都会被删除
-     */
     var _isArray = (function () {
         if (Array.isArray) {
             return Array.isArray;
@@ -116,12 +79,6 @@
         return _type('Array');
     })();
 
-    /**
-     * [description]
-     * @param  {[type]} arr [description]
-     * @param  {[type]} s   [description]
-     * @return {[type]}     [description]
-     */
     var _inArray = (function () {
         if (__indexOf) {
             return function (arr, s) {
@@ -138,11 +95,6 @@
         };
     })();
 
-    /**
-     * [description]
-     * @param  {[type]} str  [description]
-     * @return {[type]}      [description]
-     */
     var _trim = (function () {
         if (__trim) {
             return function (str) {
@@ -156,12 +108,6 @@
 
     var _dom = document.createElement('a');
 
-    /**
-     * [description]
-     * @param  {[type]} elm  [description]
-     * @param  {[type]} name [description]
-     * @return {[type]}      [description]
-     */
     var _hasClass = (function () {
         if (_dom.classList) {
             return function (elm, name) {
@@ -173,12 +119,6 @@
         };
     })();
 
-    /**
-     * [description]
-     * @param  {[type]} elm  [description]
-     * @param  {[type]} name [description]
-     * @return {[type]}      [description]
-     */
     var _addClass = (function () {
         if (_dom.classList) {
             return function (elm, name) {
@@ -194,12 +134,6 @@
         };
     })();
 
-    /**
-     * [description]
-     * @param  {[type]} elm  [description]
-     * @param  {[type]} name [description]
-     * @return {[type]}      [description]
-     */
     var _removeClass = (function () {
         if (_dom.classList) {
             return function (elm, name) {
@@ -214,6 +148,30 @@
             }
         };
     })();
+
+    var _fix = function (evt) {
+        var event = evt || window.event;
+
+        if (event.target) {
+            return event;
+        }
+
+        var ret = {};
+
+        for (var i in event) {
+            ret[i] = event[i];
+        }
+
+        ret.target = event.srcElement || document;
+        ret.preventDefault = function preventDefault() {
+            event.returnValue = false;
+        };
+        ret.stopPropagation = function stopPropagation() {
+            event.cancelBubble = false;
+        };
+
+        return ret;
+    };
 
     var _ElementExp = /Element/;
 
@@ -237,11 +195,6 @@
         return false;
     };
 
-    /**
-     * [_toArray description]
-     * @param  {[type]} arr [description]
-     * @return {[type]}     [description]
-     */
     var _toArray = function (arr) {
         if (arr === undefined) {
             return [];
@@ -258,20 +211,12 @@
 
     var _isString = _type('String');
 
-    /**
-     * [_extend description]
-     * @return {[type]} [description]
-     */
     var _extend = function () {
         var args = arguments;
         var main;
         var extend;
 
         if (!args.length) {
-            return;
-        }
-
-        if (!_isObject(extend)) {
             return;
         }
 
@@ -285,35 +230,26 @@
             extend = args[1];
         }
 
+        if (!_isObject(extend)) {
+            return;
+        }
+
         for (var property in extend) {
-            if (extend.hasOwnProperty(property) && !main[property]) {
+            if (extend.hasOwnProperty(property)) {
                 main[property] = extend[property];
             }
         }
     };
 
-    /**
-     * [_random description]
-     * @return {[type]} [description]
-     */
     var _random = function () {
         return Math.random().toString(16).substring(2);
     };
 
-    /**
-     * [_observable description]
-     * @param  {[type]} ctx [description]
-     * @return {[type]}     [description]
-     */
     var _observable = function (ctx) {
         ctx = ctx || {};
 
         var _callback = {};
 
-        /**
-         * [trigger description]
-         * @return {[type]} [description]
-         */
         ctx.trigger = function () {
             var argv = _toArray(arguments);
             var name = argv[0];
@@ -324,12 +260,6 @@
             }
         };
 
-        /**
-         * [off description]
-         * @param  {[type]}   name [description]
-         * @param  {Function} fn   [description]
-         * @return {[type]}        [description]
-         */
         ctx.off = function (name, fn) {
             if (!name) {
                 _callback = {};
@@ -350,14 +280,8 @@
             }
         };
 
-        /**
-         * [on description]
-         * @param  {[type]}   name [description]
-         * @param  {Function} fn   [description]
-         * @return {[type]}        [description]
-         */
         ctx.on = function (name, fn) {
-            if (isArray(fn)) {
+            if (_isArray(fn)) {
                 fn.ctx = name;
                 ctx.on(fn[0], fn[1]);
                 return;
@@ -383,13 +307,8 @@
         return true;
     };
 
-
-
-    /**
-     * [Dialog description]
-     * @param {[type]} options [description]
-     */
     function Dialog(options) {
+        options = options || {};
         if ((this instanceof Dialog) === false) {
             return new Dialog(options);
         }
@@ -397,11 +316,6 @@
         this.init(options);
     }
 
-    /**
-     * [set description] 目前来说没什么需要防止的
-     * @param {[type]} key   [description]
-     * @param {[type]} value [description]
-     */
     Dialog.set = function (key, value) {
         if (_PREFIX_DEFAULT_REG.test(key)) {
             throw new Error('Word `default` can\'t be use as key\'s prefix');
@@ -410,11 +324,6 @@
         return Dialog;
     };
 
-    /**
-     * [get description]
-     * @param  {[type]} key [description]
-     * @return {[type]}     [description]
-     */
     Dialog.get = function (key) {
         return _config[key];
     };
@@ -424,18 +333,12 @@
         if (list.length === 0) {
             return false;
         }
-        return _every(list, function (item, i) {
+        return _every(list, function (item) {
             return item._status === 'open';
         });
     };
 
     var util = {
-        /**
-         * [inArray description]
-         * @param  {[type]} arr [description]
-         * @param  {[type]} s   [description]
-         * @return {[type]}     [description]
-         */
         inArray: function (arr, s) {
             if (!_isArray(arr) || s === undefined) {
                 return false;
@@ -446,12 +349,6 @@
         isObject: _isObject,
         isFunction: _isFunction,
         isString: _isString,
-        /**
-         * [hasClass description]
-         * @param  {[type]}  elm       [description]
-         * @param  {[type]}  className [description]
-         * @return {Boolean}           [description]
-         */
         hasClass: function (elm, className) {
             if (!elm || !className) {
                 return false;
@@ -478,15 +375,6 @@
 
     Dialog.VERSION = '1.0.0';
 
-    // 按钮设计
-    // botton: [{
-    //  id: 'xxx',
-    //  value: '',
-    //  callback: ''
-    // }]
-
-    // 自定义
-
     var DialogProto = Dialog.prototype;
 
     DialogProto.init = function (options) {
@@ -495,7 +383,11 @@
         this._id = _random();
         this.btnGroups = [];
 
-        if (options.initlize) {
+        this.trigger('init');
+        this.options.init && this.options.init.call(this);
+
+
+        if (this.options.visible) {
             this._status = _STATUS_OPEN;
         }
         else {
@@ -524,39 +416,47 @@
 
         _cache.push(this);
 
+        this.trigger('inited');
+        this.options.inited && this.options.inited.call(this);
     };
 
     var _addEvent = (function () {
         if (window.addEventListener) {
             return function (el, evt, fn) {
                 el.addEventListener(evt, fn, false);
-            }
+            };
         }
         return function (el, evt, fn) {
             el.attachEvent('on' + evt, fn);
-        }
+        };
     })();
 
     var _removeEvent = (function () {
         if (window.removeEventListener) {
             return function (el, evt, fn) {
                 el.removeEventListener(evt, fn, false);
-            }
+            };
         }
         return function (el, evt, fn) {
             el.detachEvent('on' + evt, fn);
-        }
+        };
     })();
 
     DialogProto.resize = function () {
-        self._setPos();
+        this._setPos();
     };
 
     DialogProto._bindEvt = function () {
         var self = this;
 
+        self.on('resize', function () {
+            self._setPos();
+            self.options.resize && self.options.resize.call(self);
+        });
+
         var _close = function () {
             self.trigger('close');
+            self.options.close && self.options.close.call(self);
         };
 
         self._customCallback = [{
@@ -579,7 +479,8 @@
                 var evt = self.options.events[i];
                 if (self.dom[evt.tag]) {
                     var fn = function (evt) {
-                        evt.fn.call(self.dom, evt);
+                        var event = _fix(evt);
+                        evt.fn.call(self.dom, event);
                     };
                     var cb = {
                         evt: evt.evt,
@@ -598,15 +499,17 @@
             this.show();
         }
         else {
-            this.hide()
+            this.hide();
         }
     };
 
     DialogProto.show = function () {
+        this._status = _STATUS_OPEN;
         this.dom.mask.style.visibility = 'visible';
     };
 
     DialogProto.hide = function () {
+        this._status = _STATUS_CLOSE;
         this.dom.mask.style.visibility = 'hidden';
     };
 
@@ -630,7 +533,8 @@
     };
 
     DialogProto._getDom = function () {
-        var wrap = document.getElementById(this.id);
+        var wrap = document.getElementById(this._id);
+        // console.log(wrap);
         this.dom = {};
         var elements = wrap.getElementsByTagName('*');
 
@@ -644,14 +548,14 @@
     DialogProto._create = function () {
         var body = document.body;
         var wrap = document.createElement('div');
-        _css(wrap, 'position:absolute;left:0;top:0;');
+        // _css(wrap, 'position:absolute;left:0;top:0;');
         wrap.id = this._id;
         if (this.options.theme) {
             wrap.className = this.options.theme;
         }
-        var template = Dialog.get('template') || Dialog.get('defaultTemplate')
+        var template = Dialog.get('template') || Dialog.get('defaultTemplate');
         _html(wrap, template);
-        document.body.appendChild = wrap;
+        body.appendChild(wrap);
     };
 
     DialogProto._setPos = function () {
@@ -756,7 +660,7 @@
 
         this._initClose();
 
-        var title = this.title || '';
+        var title = this.options.title || '';
 
         this.title(title);
     };
@@ -780,26 +684,34 @@
 
     DialogProto.title = function (title) {
         _html(this.dom.title, title);
-        this._setPos();
+        this.trigger('resize');
     };
 
-    function Button(wrap, options) {
-        this.init(wrap, options);
+    function Button(ctx, wrap, options) {
+        this.init(ctx, wrap, options);
     };
 
     var ButtonProto = Button.prototype;
 
-    ButtonProto.init = function (wrap, options) {
+    ButtonProto.init = function (ctx, wrap, options) {
+        this.parent = ctx;
         this.wrap = wrap;
         this.options = options;
         var newButton = document.createElement('input');
         newButton.type = 'button';
         newButton.value = this.options.value || '';
-        newButton.id = this.options.id;
-        newButton.className = 'qie-dialog-btn' + this.options.className ? ' ' + this.options.className : '';
+        if (this.options.id) {
+            newButton.id = this.options.id;
+        }
+
+        if (this.options.name) {
+            newButton.name = this.options.name;
+        }
+        newButton.className = 'qie-dialog-btn' + (this.options.className ? (' ' + this.options.className) : '');
         this.wrap.appendChild(newButton);
         this.dom = newButton;
-        newButton.onclick = this.options.callback || _noop;
+        newButton.onclick = _noop;
+        this.proxy(this.options.callback);
         if (this.options.proxy) {
             this.proxy(this.options.proxy);
         }
@@ -820,7 +732,7 @@
         }
         disabled = !!disabled;
         if (disabled) {
-            this.dom.setAttribute('disabled', 'disabled')
+            this.dom.setAttribute('disabled', 'disabled');
         }
         else {
             this.dom.removeAttribute('disabled');
@@ -836,10 +748,12 @@
 
     ButtonProto.proxy = function (fn) {
         var cb = this.dom.onclick;
+        var self = this;
 
         this.dom.onclick = function (evt) {
-            if (fn(evt)) {
-                cb(evt);
+            var event = _fix(evt);
+            if (fn.call(self, event)) {
+                cb.call(self, event);
             }
         };
     };
@@ -852,44 +766,35 @@
         return this.dom.value;
     };
 
-    ButtonProto.show = function (v) {
+    ButtonProto.show = function () {
         _show(this.dom);
     };
 
-    ButtonProto.hide = function (v) {
+    ButtonProto.hide = function () {
         _hide(this.dom);
     };
 
     DialogProto.button = function (list) {
         for (var i = 0, len = list.length; i < len; i++) {
-            this.btnGroups.push(new Button(this.dom.buttons, list[i]));
+            this.btnGroups.push(new Button(this, this.dom.buttons, list[i]));
         }
-        this._setPos();
+        this.trigger('resize');
     };
 
-    /**
-     * 设置内容
-     * @return {[type]} [description]
-     */
     DialogProto.content = function (htmlstr) {
         _html(this.dom.content, htmlstr);
-        this._setPos();
+        this.trigger('resize');
     };
 
-    /**
-     * 设置时间
-     * @param  {[type]} t [description]
-     * @return {[type]}   [description]
-     */
     DialogProto.time = function () {
     };
 
     _addEvent(window, 'resize', function () {
         var list = Dialog.get('defaultCache');
         for (var i = 0, len = list.length; i < len; i++) {
-            list[i].resize();
+            list[i].trigger('resize');
         }
-    })
+    });
 
     DialogProto.animate = function () {};
 

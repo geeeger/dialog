@@ -1,11 +1,13 @@
 var livereloadPortNumber = 8888;
 var keepalivePortNumber = 8081
 var testPortNumber = 8082;
+var demoPortNumber = 8083;
 
 module.exports = {
   "livereloadPortNumber": livereloadPortNumber,
   "keepalivePortNumber": keepalivePortNumber,
-  "testPortNumber": testPortNumber
+  "testPortNumber": testPortNumber,
+  "demoPortNumber": demoPortNumber
 };
 
 function generatePortNumber() {
