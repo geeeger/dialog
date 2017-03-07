@@ -21,9 +21,9 @@
      * @type {Object}
      */
     var _config = {
-        template: [
+        defaultTemplate: [
             '<div class="qie-dialog-mask">',
-                '<div class="qie-dialog">',
+                '<div class="qie-dialog-dialog">',
                     '<div class="qie-dialog-header">',
                         '<div class="qie-dialog-title"></div>',
                         '<input class="qie-dialog-close" type="button" value="\xd7" />',
@@ -34,8 +34,12 @@
                     '</div>',
                 '</div>',
             '</div>'
-        ].join('')
+        ].join(''),
+        defaultzIndex: 1988,
+        defaultCache: [],
     };
+
+    var _noop = function () {};
 
     var _PREFIX_REG = /^qie-dialog-/;
 
@@ -365,6 +369,22 @@
         return ctx;
     };
 
+    var _every = function (arr, fn) {
+        var len = arr.length;
+        var i = 0;
+        while (i < len) {
+            var value = arr[i];
+            if (!fn.call(null, value, i)) {
+                return false;
+            }
+            i++;
+        }
+
+        return true;
+    };
+
+
+
     /**
      * [Dialog description]
      * @param {[type]} options [description]
@@ -397,6 +417,16 @@
      */
     Dialog.get = function (key) {
         return _config[key];
+    };
+
+    Dialog.opened = function () {
+        var list = Dialog.get('defaultCache');
+        if (list.length === 0) {
+            return false;
+        }
+        return _every(list, function (item, i) {
+            return item._status === 'open';
+        });
     };
 
     var util = {
@@ -440,7 +470,8 @@
         hide: _hide,
         show: _show,
         css: _css,
-        toCamels: _transToCamels
+        toCamels: _transToCamels,
+        every: _every
     };
 
     Dialog.util = util;
@@ -483,7 +514,114 @@
 
         this._initFooter();
 
-        this._initlize();
+        this._initVisible();
+
+        this._setPos();
+
+        this._bindEvt();
+
+        var _cache = Dialog.get('defaultCache');
+
+        _cache.push(this);
+
+    };
+
+    var _addEvent = (function () {
+        if (window.addEventListener) {
+            return function (el, evt, fn) {
+                el.addEventListener(evt, fn, false);
+            }
+        }
+        return function (el, evt, fn) {
+            el.attachEvent('on' + evt, fn);
+        }
+    })();
+
+    var _removeEvent = (function () {
+        if (window.removeEventListener) {
+            return function (el, evt, fn) {
+                el.removeEventListener(evt, fn, false);
+            }
+        }
+        return function (el, evt, fn) {
+            el.detachEvent('on' + evt, fn);
+        }
+    })();
+
+    DialogProto.resize = function () {
+        self._setPos();
+    };
+
+    DialogProto._bindEvt = function () {
+        var self = this;
+
+        var _close = function () {
+            self.trigger('close');
+        };
+
+        self._customCallback = [{
+            tag: 'wrap',
+            evt: 'dbclick',
+            fn: _close
+        },
+        {
+            tag: 'close',
+            evt: 'click',
+            fn: _close
+        }];
+
+        _addEvent(self.dom.wrap, 'dbclick', _close);
+
+        _addEvent(self.dom.close, 'close', _close);
+
+        if (self.options.events) {
+            for (var i = 0, len = self.options.events.length; i < len; i++) {
+                var evt = self.options.events[i];
+                if (self.dom[evt.tag]) {
+                    var fn = function (evt) {
+                        evt.fn.call(self.dom, evt);
+                    };
+                    var cb = {
+                        evt: evt.evt,
+                        tag: evt.tag,
+                        fn: fn
+                    };
+                    _addEvent(self.dom[evt.tag], evt.evt, fn);
+                    _customCallback.push(cb);
+                }
+            }
+        }
+    };
+
+    DialogProto._initVisible = function () {
+        if (this.options.visible) {
+            this.show();
+        }
+        else {
+            this.hide()
+        }
+    };
+
+    DialogProto.show = function () {
+        this.dom.mask.style.visibility = 'visible';
+    };
+
+    DialogProto.hide = function () {
+        this.dom.mask.style.visibility = 'hidden';
+    };
+
+    DialogProto.visible = function (booleanVal) {
+        if (booleanVal === undefined) {
+            return this.dom.mask.style.visibility !== 'hidden';
+        }
+        else {
+            if (booleanVal) {
+                this.show();
+            }
+            else {
+                this.hide();
+            }
+        }
     };
 
     DialogProto._initContent = function () {
@@ -511,25 +649,104 @@
         if (this.options.theme) {
             wrap.className = this.options.theme;
         }
-        _html(wrap, Dialog.get('template'));
+        var template = Dialog.get('template') || Dialog.get('defaultTemplate')
+        _html(wrap, template);
         document.body.appendChild = wrap;
     };
 
-    DialogProto._initPos = function () {};
+    DialogProto._setPos = function () {
+        var dialogWidth = this.dom.dialog.offsetWidth;
+        var dialogHeight = this.dom.dialog.offsetHeight;
+        var left = 0;
+        var top = 0;
+        if (this.options.lock) {
+            var maskWidth = this.dom.mask.offsetWidth;
+            var maskHeight = this.dom.mask.offsetHeight;
+            left = (maskWidth - dialogWidth) / 2;
+            top = (maskHeight - dialogHeight) / 2;
+        }
+        else {
+            var rootElement = document.documentElement;
+            var windowWidth = rootElement.clientWidth;
+            var windowHeight = rootElement.clientHeight;
+            left = (windowWidth - dialogWidth) / 2;
+            top = (windowHeight - dialogHeight) / 2;
+        }
 
-    DialogProto._initMask = function () {};
+        var zIndex = (this.options.zIndex || Dialog.get('defaultzIndex')) + 1;
 
-    DialogProto._initTitle = function () {};
+        var css = [
+            'position:absolute',
+            'zIndex:' + zIndex,
+            'left:' + parseInt(left) + 'px',
+            'top:' + parseInt(top) + 'px'
+        ].join(';');
+        _css(this.dom.dialog, css);
+    };
 
-    DialogProto._initButton = function () {};
+    DialogProto._initMask = function () {
+        var css = [
+            'position:fixed',
+            'z-index:' + (this.options.zIndex || Dialog.get('defaultzIndex')),
+            'left:0',
+            'top:0',
+            'right:0',
+            'bottom:0',
+            'margin:auto',
+            'overflow:hidden',
+        ];
+        if (this.options.lock) {
+            _css(this.dom.mask, css.join(';'));
+        }
+    };
 
-    DialogProto.open = function () {};
+    DialogProto.destroy = function () {
+        for (var i = 0, len = this.btnGroups.length; i < len; i++) {
+            this.btnGroups[i].free();
+        }
 
-    DialogProto.close = function () {};
+        this.btnGroups = [];
 
-    DialogProto.lock = function () {};
+        this.off();
 
-    DialogProto.unlock = function () {};
+        for (var i = 0, len = this._customCallback; i < len; i++) {
+            var evt = this._customCallback[i];
+            _removeEvent(this.dom[evt.tag], evt.evt, evt.fn);
+        }
+
+        var _cache = Dialog.get('defaultCache');
+
+        for (var i = 0, len = _cache.length; i < len; i++) {
+            if (_cache[i] === this) {
+                _cache.splice(i, 1);
+            }
+        }
+
+        var dom = document.getElementById(this._id);
+
+        var parent = dom.parentNode;
+
+        parent.removeChild(dom);
+
+        this.options = null;
+        this._id = null;
+    };
+
+    DialogProto.close = function () {
+        this.destroy();
+    };
+
+    DialogProto.lock = function () {
+        this.options.lock = true;
+        this._initMask();
+        this._setPos();
+    };
+
+    DialogProto.unlock = function () {
+        this.options.lock = false;
+        this._initMask();
+        this._setPos();
+    };
 
     DialogProto._initHeader = function () {
         if (this.options.header === false) {
@@ -563,6 +780,7 @@
 
     DialogProto.title = function (title) {
         _html(this.dom.title, title);
+        this._setPos();
     };
 
     function Button(wrap, options) {
@@ -570,8 +788,6 @@
     };
 
     var ButtonProto = Button.prototype;
-
-    var _noop = function () {};
 
     ButtonProto.init = function (wrap, options) {
         this.wrap = wrap;
@@ -594,10 +810,17 @@
     };
 
     ButtonProto.disable = function (disabled) {
-        // this.dom.disabled = !!disabled;
+        if (disabled === undefined) {
+            if (this.dom.hasAttribute) {
+                return this.dom.hasAttribute('disabled');
+            }
+            else {
+                return this.dom.getAttribute('disabled') !== null;
+            }
+        }
         disabled = !!disabled;
         if (disabled) {
-            this.dom.addAttribute('disabled', 'disabled')
+            this.dom.setAttribute('disabled', 'disabled')
         }
         else {
             this.dom.removeAttribute('disabled');
@@ -606,7 +829,6 @@
 
     ButtonProto.free = function () {
         this.dom.onclick = null;
-        this.wrap.removeChild(this.dom);
         this.wrap = null;
         this.options = null;
         this.dom = null;
@@ -616,8 +838,8 @@
         var cb = this.dom.onclick;
 
         this.dom.onclick = function (evt) {
-            if (fn()) {
-                cb();
+            if (fn(evt)) {
+                cb(evt);
             }
         };
     };
@@ -640,8 +862,9 @@
 
     DialogProto.button = function (list) {
         for (var i = 0, len = list.length; i < len; i++) {
-            this.btnGroups.push(new Button(list[i]));
+            this.btnGroups.push(new Button(this.dom.buttons, list[i]));
         }
+        this._setPos();
     };
 
     /**
@@ -650,6 +873,7 @@
      */
     DialogProto.content = function (htmlstr) {
         _html(this.dom.content, htmlstr);
+        this._setPos();
     };
 
     /**
@@ -659,6 +883,13 @@
      */
     DialogProto.time = function () {
     };
+
+    _addEvent(window, 'resize', function () {
+        var list = Dialog.get('defaultCache');
+        for (var i = 0, len = list.length; i < len; i++) {
+            list[i].resize();
+        }
+    })
 
     DialogProto.animate = function () {};
 
