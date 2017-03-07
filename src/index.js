@@ -278,16 +278,17 @@
                     }
                 }
             }
+            return ctx;
         };
 
         ctx.on = function (name, fn) {
             if (_isArray(fn)) {
                 fn.ctx = name;
-                ctx.on(fn[0], fn[1]);
-                return;
+                return ctx.on(fn[0], fn[1]);
             }
             var _callbacks = _callback[name] ? _callback[name] : (_callback[name] = []);
             _callbacks.push(fn);
+            return ctx;
         };
 
         return ctx;
@@ -312,8 +313,9 @@
         if ((this instanceof Dialog) === false) {
             return new Dialog(options);
         }
-
-        this.init(options);
+        _observable(this);
+        this._init(options);
+        return this;
     }
 
     Dialog.set = function (key, value) {
@@ -377,26 +379,24 @@
 
     var DialogProto = Dialog.prototype;
 
-    DialogProto.init = function (options) {
-        _observable(this);
+    DialogProto._init = function (options) {
         this.options = options;
         this._id = _random();
         this.btnGroups = [];
-
+        this.time(this.options.time);
         this.trigger('init');
         this.options.init && this.options.init.call(this);
-
-
-        if (this.options.visible) {
-            this._status = _STATUS_OPEN;
-        }
-        else {
-            this._status = _STATUS_CLOSE;
-        }
 
         this._create();
 
         this._getDom();
+
+        // if (this.options.visible) {
+        //     this._status = _STATUS_OPEN;
+        // }
+        // else {
+        //     this._status = _STATUS_CLOSE;
+        // }
 
         this._initMask();
 
@@ -413,7 +413,6 @@
         this._bindEvt();
 
         var _cache = Dialog.get('defaultCache');
-
         _cache.push(this);
 
         this.trigger('inited');
@@ -454,9 +453,12 @@
             self.options.resize && self.options.resize.call(self);
         });
 
+        self.on('close', function () {
+            self.options.close && self.options.close.call(self);
+        })
+
         var _close = function () {
             self.trigger('close');
-            self.options.close && self.options.close.call(self);
         };
 
         self._customCallback = [{
@@ -504,11 +506,15 @@
     };
 
     DialogProto.show = function () {
+        _removeClass(this.dom.wrap, 'status-close');
+        _addClass(this.dom.wrap, 'status-open');
         this._status = _STATUS_OPEN;
         this.dom.mask.style.visibility = 'visible';
     };
 
     DialogProto.hide = function () {
+        _removeClass(this.dom.wrap, 'status-open');
+        _addClass(this.dom.wrap, 'status-close');
         this._status = _STATUS_CLOSE;
         this.dom.mask.style.visibility = 'hidden';
     };
@@ -539,7 +545,7 @@
         var elements = wrap.getElementsByTagName('*');
 
         for (var i = 0, len = elements.length; i < len; i++) {
-            var name = _transToCamels(elements[i].className.replace(_PREFIX_REG, ''));
+            var name = _transToCamels(elements[i].className.split(' ')[0].replace(_PREFIX_REG, ''));
             this.dom[name] = elements[i];
         }
         this.dom.wrap = wrap;
@@ -550,6 +556,7 @@
         var wrap = document.createElement('div');
         // _css(wrap, 'position:absolute;left:0;top:0;');
         wrap.id = this._id;
+        wrap.className = 'qie-dialog status-close';
         if (this.options.theme) {
             wrap.className = this.options.theme;
         }
@@ -611,8 +618,6 @@
 
         this.btnGroups = [];
 
-        this.off();
-
         for (var i = 0, len = this._customCallback; i < len; i++) {
             var evt = this._customCallback[i];
             _removeEvent(this.dom[evt.tag], evt.evt, evt.fn);
@@ -634,6 +639,10 @@
 
         this.options = null;
         this._id = null;
+
+        this.trigger('closed');
+
+        this.off();
     };
 
     DialogProto.close = function () {
@@ -643,13 +652,13 @@
     DialogProto.lock = function () {
         this.options.lock = true;
         this._initMask();
-        this._setPos();
+        this.trigger('resize');
     };
 
     DialogProto.unlock = function () {
         this.options.lock = false;
         this._initMask();
-        this._setPos();
+        this.trigger('resize');
     };
 
     DialogProto._initHeader = function () {
@@ -752,7 +761,7 @@
 
         this.dom.onclick = function (evt) {
             var event = _fix(evt);
-            if (fn.call(self, event)) {
+            if (fn.call(self, event) !== false) {
                 cb.call(self, event);
             }
         };
@@ -786,7 +795,18 @@
         this.trigger('resize');
     };
 
-    DialogProto.time = function () {
+    // 自动关闭功能
+    DialogProto.time = function (time) {
+        var self = this;
+        if (self._timer) {
+            clearTimeout(self._timer);
+        }
+
+        if (time) {
+            self._timer = setTimeout(function () {
+                self.trigger('close');
+            }, time);
+        }
     };
 
     _addEvent(window, 'resize', function () {

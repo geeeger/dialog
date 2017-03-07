@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <title>demo</title>
     <script type="text/javascript" src="../dist/index.js"></script>
+    <style>
+        .qie-dialog-mask {
+            transition: all .5s ease-in;
+        }
+        .status-open .qie-dialog-mask {
+            visibility: visible;
+            opacity: 1;
+        }
+        .status-close .qie-dialog-mask{
+            visibility: hidden;
+            opacity: 0;
+        }
+    </style>
 </head>
 <body>
     <script type="text/javascript">
@@ -34,15 +47,17 @@
                     header: false,
                     footer: false,
                     theme: 'qie-toast',
-                    time: 3,
-                    content: content
+                    // time: 3000,
+                    content: content,
+                    close: function () {
+                        this.close();
+                    }
                 });
             },
             confirm: function (msg, callback) {
                 return qieDialog({
-                    visible: true,
-                    header: false,
-                    // lock: true,
+                    visible: false,
+                    // header: false,
                     buttons: [
                         {
                             value: '确认',
@@ -55,17 +70,47 @@
                             className: 'qie-dialog-btn-cancel'
                         }
                     ],
-                    content: msg
+                    content: msg,
+                    title: '测试',
+                    lock: true,
+                    close: function () {
+                        var self = this;
+                        self.hide();
+                        setTimeout(function () {
+                            self.close();
+                        }, 500);
+                    },
+                    inited: function () {
+                        var self = this;
+                        self.visible(true);
+                        var i = 3;
+                        var t = setInterval(function () {
+                            self.title('测试' + i);
+                            i--;
+                            if (i < 0) {
+                                clearInterval(t);
+                                self.trigger('close');
+                            }
+                        }, 1000);
+                    }
                 })
             }
         });
 
-        qieDialog.toast('hahahaha');
+        // qieDialog.toast('hahahaha');
 
-        qieDialog.confirm('测试确认框', function (evt) {
+        var c = qieDialog.confirm('测试确认框', function (evt) {
             console.log(this.parent)
             alert(this.value())
-        });
+        }).on('close', function () {
+            console.log('close');
+        }).on('closed', function () {
+            console.log('closed');
+        }).on('init', function () {
+            console.log('init');
+        }).on('inited', function () {
+            console.log('inited');
+        })
 
         // console.log(qieDialog.util)
 
