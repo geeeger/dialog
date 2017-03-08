@@ -6,6 +6,7 @@ module.exports = function(grunt) {
 
     taskConfig.pkg = require('./package.json');
     grunt.initConfig(taskConfig);
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     grunt.registerTask('build', ['eslint:all', 'browserify:build', 'uglify:build']);
     grunt.registerTask('lint', ['eslint:all']);
@@ -31,20 +32,28 @@ module.exports = function(grunt) {
             return deferred.promise;
         }
 
+        function clean() {
+            return run('grunt clean');
+        }
+
+        function build() {
+            return run('grunt build');
+        }
+
         function release() {
             return run([
                 'cd ./dist/',
-                'rm -rf ./git',
                 'git init',
                 'git remote add origin http://git.qietv.work/frontend-common/dialog-release.git',
                 'git add .',
                 'git commit -m "release"',
-                'git push origin master --force',
-                'rm -rf ./git'
-            ].join(' && '), 'release');
+                'git push origin master --force'
+            ].join('&&'), 'release');
         }
 
         new Q()
+            .then(clean)
+            .then(build)
             .then(release)
             .catch(function (e) {
                 grunt.fail.warn(e || 'release failed');
