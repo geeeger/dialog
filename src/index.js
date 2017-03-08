@@ -490,7 +490,8 @@
         every: _every,
         addEvt: _addEvent,
         removeEvt: _removeEvent,
-        eventFix: _fix
+        eventFix: _fix,
+        html: _html
     };
 
     Dialog.util = util;
