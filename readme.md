@@ -49,3 +49,84 @@
 ### Dialog.util.removeEvt(dom, eventname, fn)
 ### Dialog.util.eventFix(event)
 
+## Dialog 构造器
+
+### 参数的含义
+
+```js
+{
+    init: function () {
+
+    },
+    theme: 'string'，
+    lock: true,
+    zIndex: 1999,
+    header: false,
+    footer: false,
+    visible: true,
+    time: 3000,
+    inited: function () {
+
+    },
+    resize: function () {
+
+    },
+    close: function () {
+
+    },
+    content: "内容",
+    title: "标题",
+    closebtn: false,
+    buttons: [
+        {
+            value: 'ok',
+            callback: function (evt) {
+                this.lock = true;
+                ajax.get('/', function (data) {
+                    this.lock = false;
+                    if (data.code === 200) {
+                        this.parent.close();
+                    }
+                })
+            },
+            proxy: function (evt) {
+                if (this.lock) {
+                    return false;
+                }
+            },
+            name: 'ok',
+            id: "ok",
+            text: '确认',
+            className: 'qie-dialog-btn-ok'
+        },
+        {
+            value: 'cancel',
+            name: 'cancel',
+            id: "cancel",
+            text: '取消',
+            callback: function (evt) {
+                console.log(this);
+            },
+            className: 'qie-dialog-btn-cancel'
+        }
+    ],
+    events: [
+        {
+            tag: 'tips',
+            evt: 'mouseover',
+            fn: function (evt) {
+                console.log(this);
+                var target = evt.target;
+            }
+        },
+        {
+            tag: 'tips',
+            evt: 'mouseout',
+            fn: function (evt) {
+                console.log(this);
+                var target = evt.target;
+            }
+        }
+    ]
+}
+```

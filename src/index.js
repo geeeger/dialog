@@ -592,7 +592,7 @@
                 if (self.dom[evt.tag]) {
                     var fn = function (evt) {
                         var event = _fix(evt);
-                        evt.fn.call(self.dom, event);
+                        evt.fn.call(self, event);
                     };
                     var cb = {
                         evt: evt.evt,
@@ -600,7 +600,7 @@
                         fn: fn
                     };
                     _addEvent(self.dom[evt.tag], evt.evt, fn);
-                    _customCallback.push(cb);
+                    self._customCallback.push(cb);
                 }
             }
         }
