@@ -18,23 +18,16 @@ module.exports = function(grunt) {
         function run(cmd, msg) {
             var deferred = Q.defer();
             grunt.verbose.writeln('Running: ' + cmd);
+            var success = shell.exec(cmd, {
+                silent: false
+            }).code === 0;
 
-            // if (nowrite) {
-            //     grunt.log.ok(msg || cmd);
-            //     deferred.resolve();
-            // } else {
-                var success = shell.exec(cmd, {
-                    silent: false
-                }).code === 0;
-
-                if (success) {
-                    grunt.log.ok(msg || cmd);
-                    deferred.resolve();
-                } else {
-                    // fail and stop execution of further tasks
-                    deferred.reject('Failed when executing: `' + cmd + '`\n');
-                }
-            // }
+            if (success) {
+                grunt.log.ok(msg || cmd);
+                deferred.resolve();
+            } else {
+                deferred.reject('Failed when executing: `' + cmd + '`\n');
+            }
             return deferred.promise;
         }
 
@@ -49,45 +42,11 @@ module.exports = function(grunt) {
                 'rm -rf ./git'
             ].join(' && '), 'release');
         }
-        // function move2() {
-        //     return run('ls', 'ls');
-        // }
-
-        // function init() {
-        //     return run(, 'init .git');
-        // }
-
-        // function addOrigin() {
-        //     return run(, 'add remote origin http://git.qietv.work/frontend-common/dialog-release.git');
-        // }
-
-        // function add() {
-        //     return run(, 'add all the files to tracks');
-        // }
-
-        // function commit() {
-        //     return run(, 'commit: release');
-        // }
-
-        // function push() {
-        //     return run(, 'push by force');
-        // }
-
-        // function done() {
-        //     return run('');
-        // }
 
         new Q()
             .then(release)
-            // .then(move2)
-            // .then(init)
-            // .then(addOrigin)
-            // .then(add)
-            // .then(commit)
-            // .then(push)
             .catch(function (e) {
                 grunt.fail.warn(e || 'release failed');
             })
-            // .finally(done)
     })
 };
