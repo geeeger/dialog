@@ -65,15 +65,9 @@
     footer: false,
     visible: true,
     time: 3000,
-    inited: function () {
-
-    },
-    resize: function () {
-
-    },
-    close: function () {
-
-    },
+    inited: function () {},
+    resize: function () {},
+    close: function () {},
     content: "内容",
     title: "标题",
     closebtn: false,

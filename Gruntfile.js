@@ -34,6 +34,7 @@ module.exports = function(grunt) {
         function release() {
             return run([
                 'cd ./dist/',
+                'rm -rf ./git',
                 'git init',
                 'git remote add origin http://git.qietv.work/frontend-common/dialog-release.git',
                 'git add .',
