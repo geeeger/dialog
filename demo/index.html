@@ -100,7 +100,6 @@
         // qieDialog.toast('hahahaha');
 
         var c = qieDialog.confirm('测试确认框', function (evt) {
-            console.log(this.parent)
             alert(this.value())
         }).on('close', function () {
             console.log('close');
@@ -110,6 +109,11 @@
             console.log('init');
         }).on('inited', function () {
             console.log('inited');
+        }).on('resize', function () {
+            console.log('resize');
+        }).on('click', function (e) {
+            console.log(e.target);
+            console.log(this);
         })
 
         // console.log(qieDialog.util)

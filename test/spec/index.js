@@ -1,5 +1,5 @@
-import Dialog from 'dist/index';
-import { expect } from 'chai';
+// import Dialog from 'dist/index';
+// import { expect } from 'chai';
 
 // describe('测试构造器', () => {
 

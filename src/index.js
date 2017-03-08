@@ -308,12 +308,127 @@
         return true;
     };
 
+    var _addEvent = (function () {
+        if (window.addEventListener) {
+            return function (el, evt, fn) {
+                el.addEventListener(evt, fn, false);
+            };
+        }
+        return function (el, evt, fn) {
+            el.attachEvent('on' + evt, fn);
+        };
+    })();
+
+    var _removeEvent = (function () {
+        if (window.removeEventListener) {
+            return function (el, evt, fn) {
+                el.removeEventListener(evt, fn, false);
+            };
+        }
+        return function (el, evt, fn) {
+            el.detachEvent('on' + evt, fn);
+        };
+    })();
+
+    function Button(ctx, wrap, options) {
+        this.init(ctx, wrap, options);
+    };
+
+    var ButtonProto = Button.prototype;
+
+    ButtonProto.init = function (ctx, wrap, options) {
+        this.parent = ctx;
+        this.wrap = wrap;
+        this.options = options;
+        var newButton = document.createElement('button');
+        newButton.value = this.options.value || '';
+        newButton.innerHTML = this.options.text || this.options.value || '';
+        if (this.options.id) {
+            newButton.id = this.options.id;
+        }
+
+        if (this.options.name) {
+            newButton.name = this.options.name;
+        }
+        newButton.className = 'qie-dialog-btn' + (this.options.className ? (' ' + this.options.className) : '');
+        this.wrap.appendChild(newButton);
+        this.dom = newButton;
+        newButton.onclick = _noop;
+        this.proxy(this.options.callback);
+        if (this.options.proxy) {
+            this.proxy(this.options.proxy);
+        }
+
+        if (this.options.disabled !== undefined) {
+            this.disable(this.options.disabled);
+        }
+    };
+
+    ButtonProto.disable = function (disabled) {
+        if (disabled === undefined) {
+            if (this.dom.hasAttribute) {
+                return this.dom.hasAttribute('disabled');
+            }
+            else {
+                return this.dom.getAttribute('disabled') !== null;
+            }
+        }
+        disabled = !!disabled;
+        if (disabled) {
+            this.dom.setAttribute('disabled', 'disabled');
+        }
+        else {
+            this.dom.removeAttribute('disabled');
+        }
+    };
+
+    ButtonProto.free = function () {
+        this.dom.onclick = null;
+        this.wrap = null;
+        this.options = null;
+        this.dom = null;
+    };
+
+    ButtonProto.proxy = function (fn) {
+        var cb = this.dom.onclick;
+        var self = this;
+
+        this.dom.onclick = function (evt) {
+            var event = _fix(evt);
+            if (fn.call(self, event) !== false) {
+                cb.call(self, event);
+            }
+        };
+    };
+
+    ButtonProto.value = function (v) {
+        if (v) {
+            this.dom.value = v;
+            return;
+        }
+        return this.dom.value;
+    };
+
+    ButtonProto.show = function () {
+        _show(this.dom);
+    };
+
+    ButtonProto.hide = function () {
+        _hide(this.dom);
+    };
+
     function Dialog(options) {
         options = options || {};
         if ((this instanceof Dialog) === false) {
             return new Dialog(options);
         }
         _observable(this);
+        // 放弃异步初始化，放弃事件抛出
+        // 由于是先实例化，所以抛出init inted事件无意义
+        // var self = this;
+        // setTimeout(function () {
+        //     self._init(options)
+        // });
         this._init(options);
         return this;
     }
@@ -339,6 +454,8 @@
             return item._status === 'open';
         });
     };
+
+    Dialog.Button = Button;
 
     var util = {
         inArray: function (arr, s) {
@@ -370,7 +487,10 @@
         show: _show,
         css: _css,
         toCamels: _transToCamels,
-        every: _every
+        every: _every,
+        addEvt: _addEvent,
+        removeEvt: _removeEvent,
+        eventFix: _fix
     };
 
     Dialog.util = util;
@@ -384,7 +504,7 @@
         this._id = _random();
         this.btnGroups = [];
         this.time(this.options.time);
-        this.trigger('init');
+        // this.trigger('init');
         this.options.init && this.options.init.call(this);
 
         this._create();
@@ -415,31 +535,9 @@
         var _cache = Dialog.get('defaultCache');
         _cache.push(this);
 
-        this.trigger('inited');
+        // this.trigger('inited');
         this.options.inited && this.options.inited.call(this);
     };
-
-    var _addEvent = (function () {
-        if (window.addEventListener) {
-            return function (el, evt, fn) {
-                el.addEventListener(evt, fn, false);
-            };
-        }
-        return function (el, evt, fn) {
-            el.attachEvent('on' + evt, fn);
-        };
-    })();
-
-    var _removeEvent = (function () {
-        if (window.removeEventListener) {
-            return function (el, evt, fn) {
-                el.removeEventListener(evt, fn, false);
-            };
-        }
-        return function (el, evt, fn) {
-            el.detachEvent('on' + evt, fn);
-        };
-    })();
 
     DialogProto.resize = function () {
         this._setPos();
@@ -455,10 +553,15 @@
 
         self.on('close', function () {
             self.options.close && self.options.close.call(self);
-        })
+        });
 
         var _close = function () {
             self.trigger('close');
+        };
+
+        var _click = function (e) {
+            var event = _fix(e);
+            self.trigger('click', event);
         };
 
         self._customCallback = [{
@@ -470,11 +573,17 @@
             tag: 'close',
             evt: 'click',
             fn: _close
+        },
+        {
+            tag: 'wrap',
+            evt: 'click',
+            fn: _click
         }];
 
-        _addEvent(self.dom.wrap, 'dbclick', _close);
-
-        _addEvent(self.dom.close, 'close', _close);
+        for (var i = 0, len = self._customCallback.length; i < len; i++) {
+            var evt = self._customCallback[i];
+            _addEvent(self.dom[evt.tag], evt.evt, evt.fn);
+        }
 
         if (self.options.events) {
             for (var i = 0, len = self.options.events.length; i < len; i++) {
@@ -616,12 +725,14 @@
             this.btnGroups[i].free();
         }
 
-        this.btnGroups = [];
+        this.btnGroups = null;
 
         for (var i = 0, len = this._customCallback; i < len; i++) {
             var evt = this._customCallback[i];
             _removeEvent(this.dom[evt.tag], evt.evt, evt.fn);
         }
+
+        this._customCallback = null;
 
         var _cache = Dialog.get('defaultCache');
 
@@ -643,6 +754,10 @@
         this.trigger('closed');
 
         this.off();
+
+        this.dom = null;
+
+        this._status = null;
     };
 
     DialogProto.close = function () {
@@ -694,93 +809,6 @@
     DialogProto.title = function (title) {
         _html(this.dom.title, title);
         this.trigger('resize');
-    };
-
-    function Button(ctx, wrap, options) {
-        this.init(ctx, wrap, options);
-    };
-
-    var ButtonProto = Button.prototype;
-
-    ButtonProto.init = function (ctx, wrap, options) {
-        this.parent = ctx;
-        this.wrap = wrap;
-        this.options = options;
-        var newButton = document.createElement('input');
-        newButton.type = 'button';
-        newButton.value = this.options.value || '';
-        if (this.options.id) {
-            newButton.id = this.options.id;
-        }
-
-        if (this.options.name) {
-            newButton.name = this.options.name;
-        }
-        newButton.className = 'qie-dialog-btn' + (this.options.className ? (' ' + this.options.className) : '');
-        this.wrap.appendChild(newButton);
-        this.dom = newButton;
-        newButton.onclick = _noop;
-        this.proxy(this.options.callback);
-        if (this.options.proxy) {
-            this.proxy(this.options.proxy);
-        }
-
-        if (this.options.disabled !== undefined) {
-            this.disable(this.options.disabled);
-        }
-    };
-
-    ButtonProto.disable = function (disabled) {
-        if (disabled === undefined) {
-            if (this.dom.hasAttribute) {
-                return this.dom.hasAttribute('disabled');
-            }
-            else {
-                return this.dom.getAttribute('disabled') !== null;
-            }
-        }
-        disabled = !!disabled;
-        if (disabled) {
-            this.dom.setAttribute('disabled', 'disabled');
-        }
-        else {
-            this.dom.removeAttribute('disabled');
-        }
-    };
-
-    ButtonProto.free = function () {
-        this.dom.onclick = null;
-        this.wrap = null;
-        this.options = null;
-        this.dom = null;
-    };
-
-    ButtonProto.proxy = function (fn) {
-        var cb = this.dom.onclick;
-        var self = this;
-
-        this.dom.onclick = function (evt) {
-            var event = _fix(evt);
-            if (fn.call(self, event) !== false) {
-                cb.call(self, event);
-            }
-        };
-    };
-
-    ButtonProto.value = function (v) {
-        if (v) {
-            this.dom.value = v;
-            return;
-        }
-        return this.dom.value;
-    };
-
-    ButtonProto.show = function () {
-        _show(this.dom);
-    };
-
-    ButtonProto.hide = function () {
-        _hide(this.dom);
     };
 
     DialogProto.button = function (list) {
