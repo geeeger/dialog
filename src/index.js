@@ -675,7 +675,7 @@
             'position:absolute',
             'z-index:' + (this.options.zIndex || Dialog.get('defaultzIndex'))
         ].join(';'));
-        var template = Dialog.get('template') || Dialog.get('defaultTemplate');
+        var template = this.options.template || Dialog.get('defaultTemplate');
         _html(wrap, template);
         body.appendChild(wrap);
     };
