@@ -740,6 +740,7 @@
         for (var i = 0, len = _cache.length; i < len; i++) {
             if (_cache[i] === this) {
                 _cache.splice(i, 1);
+                break;
             }
         }
 
