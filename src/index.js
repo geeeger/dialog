@@ -666,10 +666,11 @@
         var wrap = document.createElement('div');
         // _css(wrap, 'position:absolute;left:0;top:0;');
         wrap.id = this._id;
-        wrap.className = 'qie-dialog status-close';
+        var className = 'qie-dialog status-close';
         if (this.options.theme) {
-            wrap.className = this.options.theme;
+            className += ' ' + this.options.theme;
         }
+        wrap.className = className;
         var template = Dialog.get('template') || Dialog.get('defaultTemplate');
         _html(wrap, template);
         body.appendChild(wrap);
