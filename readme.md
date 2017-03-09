@@ -460,3 +460,11 @@ bt1.onclick = function () {
 
 设置关闭时间, 超时number毫秒后，会触发close事件（在options.close里处理）
 
+### this.dom
+
+实际上模板上className为qie-dialog-aaa-bbb)的dom都会被映射到this.dom上.变成this.dom.aaaBbb的驼峰形式
+
+### this.btnGroups[]
+
+一个数组，储存了button的实例。 button实例的parent是dialog实例, wrap是 dom.buttons。
+
