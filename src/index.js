@@ -671,6 +671,10 @@
             className += ' ' + this.options.theme;
         }
         wrap.className = className;
+        _css(wrap, [
+            'position:absolute',
+            'z-index:' + (this.options.zIndex || Dialog.get('defaultzIndex'))
+        ].join(''));
         var template = Dialog.get('template') || Dialog.get('defaultTemplate');
         _html(wrap, template);
         body.appendChild(wrap);
@@ -695,7 +699,7 @@
             top = (windowHeight - dialogHeight) / 2;
         }
 
-        var zIndex = (this.options.zIndex || Dialog.get('defaultzIndex')) + 1;
+        var zIndex = (this.options.zIndex || Dialog.get('defaultzIndex')) + 2;
 
         var css = [
             'position:absolute',
@@ -709,7 +713,7 @@
     DialogProto._initMask = function () {
         var css = [
             'position:fixed',
-            'z-index:' + (this.options.zIndex || Dialog.get('defaultzIndex')),
+            'z-index:' + ((this.options.zIndex || Dialog.get('defaultzIndex')) + 1),
             'left:0',
             'top:0',
             'right:0',
