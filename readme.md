@@ -468,3 +468,43 @@ bt1.onclick = function () {
 
 一个数组，储存了button的实例。 button实例的parent是dialog实例, wrap是 dom.buttons。
 
+## 构建
+
+下面介绍构建命令
+
+安装依赖
+
+```sh
+# 若无grunt
+npm install grunt -g
+```
+
+```sh
+npm install
+```
+
+实时构建（测试未写,原因是太耗时）
+
+```sh
+grunt serve
+```
+
+构建
+```sh
+grunt build
+```
+
+代码检查
+```sh
+grunt lint
+```
+
+查看demo
+```sh
+grunt demo
+```
+
+产出(自动上传到dialog-release仓库，覆盖上传)
+```sh
+grunt release-it
+```
