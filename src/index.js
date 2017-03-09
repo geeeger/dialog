@@ -674,7 +674,7 @@
         _css(wrap, [
             'position:absolute',
             'z-index:' + (this.options.zIndex || Dialog.get('defaultzIndex'))
-        ].join(''));
+        ].join(';'));
         var template = Dialog.get('template') || Dialog.get('defaultTemplate');
         _html(wrap, template);
         body.appendChild(wrap);
