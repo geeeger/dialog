@@ -341,8 +341,8 @@
         this.wrap = wrap;
         this.options = options;
         var newButton = document.createElement('button');
-        newButton.value = this.options.value || '';
-        newButton.innerHTML = this.options.text || this.options.value || '';
+        newButton.value = this.options.value === undefined ? '' : this.options.value;
+        newButton.innerHTML = this.options.text || (this.options.value === undefined ? '' : this.options.value) || '';
         if (this.options.id) {
             newButton.id = this.options.id;
         }
