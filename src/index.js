@@ -31,7 +31,7 @@
 
     var _PREFIX_REG = /^qie-dialog-/;
 
-    var _PREFIX_DEFAULT_REG = /^qie/;
+    var _PREFIX_DEFAULT_REG = /^default/;
 
     var _css = function (el, styles) {
         el.style.cssText = styles;
