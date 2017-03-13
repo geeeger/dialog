@@ -423,12 +423,6 @@
             return new Dialog(options);
         }
         _observable(this);
-        // 放弃异步初始化，放弃事件抛出
-        // 由于是先实例化，所以抛出init inted事件无意义
-        // var self = this;
-        // setTimeout(function () {
-        //     self._init(options)
-        // });
         this._init(options);
         return this;
     }
@@ -505,19 +499,12 @@
         this._id = _random();
         this.btnGroups = [];
         this.time(this.options.time);
-        // this.trigger('init');
+
         this.options.init && this.options.init.call(this);
 
         this._create();
 
         this._getDom();
-
-        // if (this.options.visible) {
-        //     this._status = _STATUS_OPEN;
-        // }
-        // else {
-        //     this._status = _STATUS_CLOSE;
-        // }
 
         this._initMask();
 
@@ -536,7 +523,6 @@
         var _cache = Dialog.get('defaultCache');
         _cache.push(this);
 
-        // this.trigger('inited');
         this.options.inited && this.options.inited.call(this);
     };
 
@@ -707,6 +693,11 @@
             'left:' + parseInt(left) + 'px',
             'top:' + parseInt(top) + 'px'
         ].join(';');
+
+        if (!this.options.lock) {
+            css[0] = 'position:fixed';
+        }
+
         _css(this.dom.dialog, css);
     };
 
