@@ -551,6 +551,17 @@
             self.trigger('click', event);
         };
 
+        var __isfirefox = document.mozHidden;
+
+        var __supportOnWheel = 'onwheel' in document;
+
+        var mousewheel = __isfirefox ? 'DOMMouseScroll' : __supportOnWheel ? 'wheel' : 'mousewheel';
+
+        var _prevent = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
         self._customCallback = [{
             tag: 'wrap',
             evt: 'dbclick',
@@ -565,7 +576,13 @@
             tag: 'wrap',
             evt: 'click',
             fn: _click
-        }];
+        },
+        {
+            tag: 'mask',
+            evt: mousewheel,
+            fn: _prevent
+        }
+        ];
 
         for (var i = 0, len = self._customCallback.length; i < len; i++) {
             var evt = self._customCallback[i];
@@ -636,7 +653,6 @@
 
     DialogProto._getDom = function () {
         var wrap = document.getElementById(this._id);
-        // console.log(wrap);
         this.dom = {};
         var elements = wrap.getElementsByTagName('*');
 
@@ -650,7 +666,6 @@
     DialogProto._create = function () {
         var body = document.body;
         var wrap = document.createElement('div');
-        // _css(wrap, 'position:absolute;left:0;top:0;');
         wrap.id = this._id;
         var className = 'qie-dialog status-close';
         if (this.options.theme) {
