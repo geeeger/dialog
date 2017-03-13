@@ -692,11 +692,13 @@
             'zIndex:' + zIndex,
             'left:' + parseInt(left) + 'px',
             'top:' + parseInt(top) + 'px'
-        ].join(';');
+        ]
 
         if (!this.options.lock) {
             css[0] = 'position:fixed';
         }
+
+        css = css.join(';');
 
         _css(this.dom.dialog, css);
     };
