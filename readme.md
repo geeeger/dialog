@@ -338,7 +338,7 @@ console.log(typeof a.on) // function
                 '<div class="qie-dialog-title"></div>',
                 '<input class="qie-dialog-close" type="button" value="\xd7" />',
             '</div>',
-            '<div class="qie-dialog-content-wrap">,
+            '<div class="qie-dialog-content-wrap">',
                 '<div class="qie-dialog-content"></div>',
                 '<div class="qie-dialog-tips"></div>',
             '</div>',
@@ -347,7 +347,7 @@ console.log(typeof a.on) // function
             '</div>',
         '</div>',
     '</div>'
-.join('')
+].join('')
 ```
 
 那么该tips会被映射到实例的dom对象上。this.dom.tips就是该dom对象。(实际上模板上className为qie-dialog-aaa-bbb)的dom都会被映射到this.dom上.变成this.dom.aaaBbb的驼峰形式 (此处多了 this.dom.contentWrap this.dom.tips)
