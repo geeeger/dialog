@@ -297,7 +297,7 @@ console.log(typeof a.on) // function
                     '<div class="qie-dialog-title"></div>',
                     '<input class="qie-dialog-close" type="button" value="\xd7" />',
                 '</div>',
-                '<div class="qie-dialog-content-wrap">,
+                '<div class="qie-dialog-content-wrap">',
                     '<div class="qie-dialog-content"></div>',
                     '<div class="qie-dialog-tips"></div>',
                 '</div>',
@@ -306,7 +306,7 @@ console.log(typeof a.on) // function
                 '</div>',
             '</div>',
         '</div>'
-    .join('')
+    ].join('')
 }
 ```
 
