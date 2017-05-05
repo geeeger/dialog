@@ -593,8 +593,8 @@
             for (var i = 0, len = self.options.events.length; i < len; i++) {
                 var evt = self.options.events[i];
                 if (self.dom[evt.tag]) {
-                    var fn = function (evt) {
-                        var event = _fix(evt);
+                    var fn = function (evts) {
+                        var event = _fix(evts);
                         evt.fn.call(self, event);
                     };
                     var cb = {
