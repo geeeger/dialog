@@ -2,7 +2,7 @@
  * Empty module
  */
 (function() {
-    'use strict';
+       'use strict';
 
     var _STATUS_OPEN = 'open';
 
@@ -308,6 +308,30 @@
         return true;
     };
 
+    var _offset = function (dom, value) {
+        // fix bug
+        if (!dom || !dom.getBoundingClientRect) {
+            return {
+                top: 0,
+                left: 0
+            }
+        }
+        // fix bug
+        if (!dom.getClientRects().length) {
+            return {
+                top: 0,
+                left: 0
+            }
+        }
+        var rect = dom.getBoundingClientRect();
+        var wind = window;
+        var docElem = document.documentElement;
+        return {
+            top: rect.top + (wind.pageYOffset || docElem.scrollTop) - (docElem.clientTop || 0),
+            left: rect.left + (wind.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
+        };
+    }
+
     var _addEvent = (function () {
         if (window.addEventListener) {
             return function (el, evt, fn) {
@@ -485,7 +509,8 @@
         addEvt: _addEvent,
         removeEvt: _removeEvent,
         eventFix: _fix,
-        html: _html
+        html: _html,
+        _offset: _offset
     };
 
     Dialog.util = util;
@@ -524,6 +549,12 @@
         _cache.push(this);
 
         this.options.inited && this.options.inited.call(this);
+
+        this._resize();
+    };
+
+    DialogProto._resize = function () {
+        
     };
 
     DialogProto.resize = function () {
@@ -576,7 +607,8 @@
             tag: 'wrap',
             evt: 'click',
             fn: _click
-        },
+        }
+        ,
         {
             tag: 'mask',
             evt: mousewheel,
@@ -664,7 +696,7 @@
     };
 
     DialogProto._create = function () {
-        var body = document.body;
+        var body = this.options.attach || document.body;
         var wrap = document.createElement('div');
         wrap.id = this._id;
         var className = 'qie-dialog status-close';
@@ -672,10 +704,14 @@
             className += ' ' + this.options.theme;
         }
         wrap.className = className;
-        _css(wrap, [
+        var css = [
             'position:absolute',
             'z-index:' + (this.options.zIndex || Dialog.get('defaultzIndex'))
-        ].join(';'));
+        ];
+        if (this.options.attach) {
+            css = css.concat(['top:0','left:0']);
+        }
+        _css(wrap, css.join(';'));
         var template = this.options.template || Dialog.get('defaultTemplate');
         _html(wrap, template);
         body.appendChild(wrap);
@@ -686,18 +722,32 @@
         var dialogHeight = this.dom.dialog.offsetHeight;
         var left = 0;
         var top = 0;
-        if (this.options.lock) {
-            var maskWidth = this.dom.mask.offsetWidth;
-            var maskHeight = this.dom.mask.offsetHeight;
-            left = (maskWidth - dialogWidth) / 2;
-            top = (maskHeight - dialogHeight) / 2;
+        var maskWidth = 0;
+        var maskHeight = 0;
+        var windowWidth = 0;
+        var windowHeight = 0;
+        
+
+        if (this.options.attach) {
+            var attachDomWidth = this.options.attach.offsetWidth;
+            var attachDomHeight = this.options.attach.offsetHeight;
+            top = (attachDomHeight - dialogHeight) / 2;
+            left = (attachDomWidth - dialogWidth) / 2;
         }
         else {
-            var rootElement = document.documentElement;
-            var windowWidth = rootElement.clientWidth;
-            var windowHeight = rootElement.clientHeight;
-            left = (windowWidth - dialogWidth) / 2;
-            top = (windowHeight - dialogHeight) / 2;
+            if (this.options.lock) {
+                maskWidth = this.dom.mask.offsetWidth;
+                maskHeight = this.dom.mask.offsetHeight;
+                left = (maskWidth - dialogWidth) / 2;
+                top = (maskHeight - dialogHeight) / 2;
+            }
+            else {
+                var rootElement = document.documentElement;
+                windowWidth = rootElement.clientWidth;
+                windowHeight = rootElement.clientHeight;
+                left = (windowWidth - dialogWidth) / 2;
+                top = (windowHeight - dialogHeight) / 2;
+            }
         }
 
         var zIndex = (this.options.zIndex || Dialog.get('defaultzIndex')) + 2;
@@ -711,6 +761,10 @@
 
         if (!this.options.lock) {
             css[0] = 'position:fixed';
+        }
+
+        if (this.options.attach) {
+            css[0] = 'position: absolute';
         }
 
         css = css.join(';');

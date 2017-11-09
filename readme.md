@@ -218,6 +218,8 @@ console.log(typeof a.on) // function
     lock: true,
     // 可选，默认是1988
     zIndex: 1999,
+    // 可选,附着在什么位置（将整个dialog，appendChild进该Element）
+    attach: HtmlElement,
     // 是否显示对话框头
     header: false,
     // 是否显示对话框脚
